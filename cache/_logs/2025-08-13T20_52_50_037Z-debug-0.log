@@ -1,0 +1,43 @@
+0 verbose cli E:\SmartRif-coffee\app\node.exe E:\SmartRif-coffee\app\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.5.1
+2 info using node@v24.5.0
+3 silly config load:file:E:\SmartRif-coffee\app\node_modules\npm\npmrc
+4 silly config load:file:E:\SmartRif-coffee\back-end\.npmrc
+5 silly config load:file:C:\Users\cvalhoceima\.npmrc
+6 silly config load:file:E:\SmartRif-coffee\app\etc\npmrc
+7 warn Unknown global config "globalignorefile". This will stop working in the next major version of npm.
+8 verbose title npm init
+9 verbose argv "init" "--yes"
+10 verbose logfile logs-max:10 dir:E:\SmartRif-coffee\cache\_logs\2025-08-13T20_52_50_037Z-
+11 verbose logfile E:\SmartRif-coffee\cache\_logs\2025-08-13T20_52_50_037Z-debug-0.log
+12 silly logfile start cleaning logs, removing 1 files
+13 silly logfile done cleaning log files
+14 silly package data {
+14 silly package data   name: 'back-end',
+14 silly package data   version: '1.0.0',
+14 silly package data   description: '',
+14 silly package data   main: 'index.js',
+14 silly package data   scripts: {
+14 silly package data     test: 'echo "Error: no test specified" && exit 1',
+14 silly package data     start: 'node server.js'
+14 silly package data   },
+14 silly package data   keywords: [],
+14 silly package data   author: '',
+14 silly package data   license: 'ISC',
+14 silly package data   type: 'commonjs',
+14 silly package data   dependencies: {
+14 silly package data     cors: '^2.8.5',
+14 silly package data     dotenv: '^17.2.1',
+14 silly package data     express: '^5.1.0',
+14 silly package data     mongoose: '^8.17.0'
+14 silly package data   },
+14 silly package data   devDependencies: {},
+14 silly package data   Symbol(newline): '\n',
+14 silly package data   Symbol(indent): '  '
+14 silly package data }
+15 verbose cwd E:\SmartRif-coffee\back-end
+16 verbose os Windows_NT 10.0.26100
+17 verbose node v24.5.0
+18 verbose npm  v11.5.1
+19 verbose exit 0
+20 info ok

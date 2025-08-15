@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "express-generator": "^4.16.1"
+  },
+  "_npx": {
+    "packages": [
+      "express-generator"
+    ]
+  }
+}

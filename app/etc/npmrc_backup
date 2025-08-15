@@ -1,0 +1,4 @@
+cache=E:\SmartRif-coffee\cache
+globalignorefile=E:\SmartRif-coffee\app\etc\.npmignore
+init-module=E:\SmartRif-coffee\app\etc\.npm-init.js
+userconfig=E:\SmartRif-coffee\app\etc\npmrc
