@@ -1,0 +1,14 @@
+0 verbose cli E:\SmartRif-coffee\app\node.exe E:\SmartRif-coffee\app\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.5.1
+2 info using node@v24.5.0
+3 silly config load:file:E:\SmartRif-coffee\app\node_modules\npm\npmrc
+4 silly config load:file:E:\SmartRif-coffee\back-end\.npmrc
+5 silly config load:file:C:\Users\cvalhoceima\.npmrc
+6 silly config load:file:E:\SmartRif-coffee\app\etc\npmrc
+7 warn Unknown global config "globalignorefile". This will stop working in the next major version of npm.
+8 verbose title npm start
+9 verbose argv "start"
+10 verbose logfile logs-max:10 dir:E:\SmartRif-coffee\cache\_logs\2025-08-16T20_34_16_879Z-
+11 verbose logfile E:\SmartRif-coffee\cache\_logs\2025-08-16T20_34_16_879Z-debug-0.log
+12 silly logfile start cleaning logs, removing 1 files
+13 silly logfile done cleaning log files
