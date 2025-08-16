@@ -38,6 +38,9 @@ export default function AdminPanel() {
   const [menu, setMenu] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
+  const [editingItem, setEditingItem] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
+
   const [newItem, setNewItem] = useState({ name: "", price: "", category_id: "" });
   const [newUser, setNewUser] = useState({ name: "", username: "", password: "", role: "waiter" });
 
@@ -166,42 +169,73 @@ export default function AdminPanel() {
 
 
 
-      {addItemS && (
-        <div className="form-group">
-          <input
-            placeholder="Item name"
-            value={newItem.name}
-            onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-          />
-          <input
-            placeholder="Price"
-            type="number"
-            value={newItem.price}
-            onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
-          />
-          <select
-            value={newItem.category_id || ""}
-            onChange={(e) => setNewItem({ ...newItem, category_id: Number(e.target.value) })}
-          >
-            <option value="" disabled>Select category</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-          <button onClick={addMenuItem}>Add Item</button>
-        </div>
-      )}
+{/* ADD OR EDIT ITEM FORM */}
+{(addItemS || editingItem) && (
+  <div className="form-group">
+    <input
+      placeholder="Item name"
+      value={editingItem ? editingItem.name : newItem.name}
+      onChange={(e) =>
+        editingItem
+          ? setEditingItem({ ...editingItem, name: e.target.value })
+          : setNewItem({ ...newItem, name: e.target.value })
+      }
+    />
+    <input
+      placeholder="Price"
+      type="number"
+      value={editingItem ? editingItem.price : newItem.price}
+      onChange={(e) =>
+        editingItem
+          ? setEditingItem({ ...editingItem, price: parseFloat(e.target.value) })
+          : setNewItem({ ...newItem, price: parseFloat(e.target.value) })
+      }
+    />
+    <input
+      placeholder="Image URL"
+      value={editingItem ? editingItem.url : newItem.url}
+      onChange={(e) =>
+        editingItem
+          ? setEditingItem({ ...editingItem, url: e.target.value })
+          : setNewItem({ ...newItem, url: e.target.value })
+      }
+    />
+    <select
+      value={editingItem ? editingItem.category_id : newItem.category_id || ""}
+      onChange={(e) =>
+        editingItem
+          ? setEditingItem({ ...editingItem, category_id: Number(e.target.value) })
+          : setNewItem({ ...newItem, category_id: Number(e.target.value) })
+      }
+    >
+      <option value="" disabled>Select category</option>
+      {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+    </select>
 
-      {showItemS && (
-        <ul className="admin-list">
-          {menu.map((item) => (
-            <li key={item.id}>
-              {item.name} - ${item.price} ({categories.find(c => c.id === item.category_id)?.name || "No Category"})
-              <button onClick={() => deleteMenuItem(item.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      )}
+    {editingItem ? (
+      <button onClick={async () => {
+        await API.put(`/menu/${editingItem.id}`, editingItem);
+        setEditingItem(null);
+        fetchData();
+      }}>Update Item</button>
+    ) : (
+      <button onClick={addMenuItem}>Add Item</button>
+    )}
+  </div>
+)}
+
+
+{showItemS && (
+  <ul className="admin-list">
+    {menu.map(item => (
+      <li key={item.id}>
+        {item.name} - ${item.price} ({item.category || "No Category"})
+        <button onClick={() => deleteMenuItem(item.id)}>Delete</button>
+        <button onClick={() => setEditingItem(item)}>Edit</button>
+      </li>
+    ))}
+  </ul>
+)}
 
       <hr />
 
@@ -265,25 +299,40 @@ export default function AdminPanel() {
 <button onClick={() => setShowCategoryS(!showCategoryS)}>
         {showCategoryS ? "Hide Categoris List" : "Show Categoris List"}
       </button>
-      {addCategoryS && (
-<div className="form-group">
-  <input
-    placeholder="New category name"
-    value={newCategory}
-    onChange={(e) => setNewCategory(e.target.value)}
-  />
-  <button onClick={addCategory}>Add Category</button>
-</div>)}
+{/* ADD OR EDIT CATEGORY FORM */}
+{(addCategoryS || editingCategory) && (
+  <div className="form-group">
+    <input
+      placeholder="Category name"
+      value={editingCategory ? editingCategory.name : newCategory}
+      onChange={(e) =>
+        editingCategory
+          ? setEditingCategory({ ...editingCategory, name: e.target.value })
+          : setNewCategory(e.target.value)
+      }
+    />
+    {editingCategory ? (
+      <button onClick={async () => {
+        await API.put(`/categories/${editingCategory.id}`, editingCategory);
+        setEditingCategory(null);
+        fetchData();
+      }}>Update Category</button>
+    ) : (
+      <button onClick={addCategory}>Add Category</button>
+    )}
+  </div>
+)}
 
 {showCategoryS && (
-<ul className="admin-list">
-  {categories.map((cat) => (
-    <li key={cat.id}>
-      {cat.name} 
-      <button onClick={() => deleteCategory(cat.id)}>Delete</button>
-    </li>
-  ))}
-</ul>
+  <ul className="admin-list">
+    {categories.map(cat => (
+      <li key={cat.id}>
+        {cat.name} 
+        <button onClick={() => deleteCategory(cat.id)}>Delete</button>
+        <button onClick={() => setEditingCategory(cat)}>Edit</button>
+      </li>
+    ))}
+  </ul>
 )}
     </div>
     

@@ -56,19 +56,14 @@ db.serialize(() => {
     )
   `);
   
-// db.js or wherever you initialize SQLite
-db.run(`
-  CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    userId INTEGER,
-    itemId INTEGER,
-    quantity INTEGER,
-    totalPrice REAL,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(userId) REFERENCES users(id),
-    FOREIGN KEY(itemId) REFERENCES items(id)
-  )
-`);
+db.run(` CREATE TABLE IF NOT EXISTS orders (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+    table_id INTEGER, waiter_id INTEGER,
+     status TEXT DEFAULT 'pending',
+      total REAL DEFAULT 0, created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+       FOREIGN KEY (table_id) REFERENCES tables(id) ON DELETE CASCADE,
+       FOREIGN KEY (waiter_id) REFERENCES users(id) ON DELETE SET NULL )` 
+      );
 
   db.run(`
     CREATE TABLE IF NOT EXISTS order_items (
@@ -165,20 +160,29 @@ app.delete("/users/:id", verifyToken, requireAdmin, (req, res) => {
 
 // Categories CRUD
 app.post("/categories", verifyToken, requireAdmin, (req, res) => {
-  const { name } = req.body;
+  const { name, url } = req.body;
   if (!name) return res.status(400).json({ error: "Name required" });
-  db.run("INSERT INTO menu_categories (name) VALUES (?)", [name], function (err) {
+
+  db.run("INSERT INTO menu_categories (name, url) VALUES (?, ?)", [name, url || null], function (err) {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: this.lastID, name });
+    res.json({ id: this.lastID, name, url });
   });
 });
 
+
 app.put("/categories/:id", verifyToken, requireAdmin, (req, res) => {
-  const { name } = req.body;
-  db.run("UPDATE menu_categories SET name=? WHERE id=?", [name, req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ updated: this.changes });
-  });
+  const { name, url } = req.body;
+  if (!name) return res.status(400).json({ error: "Name required" });
+
+  db.run(
+    "UPDATE menu_categories SET name=?, url=? WHERE id=?",
+    [name, url || null, req.params.id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) return res.status(404).json({ error: "Category not found" });
+      res.json({ updated: this.changes });
+    }
+  );
 });
 
 app.delete("/categories/:id", verifyToken, requireAdmin, (req, res) => {
@@ -189,7 +193,7 @@ app.delete("/categories/:id", verifyToken, requireAdmin, (req, res) => {
 });
 
 app.get("/categories", verifyToken, (req, res) => {
-  db.all("SELECT id, name FROM menu_categories ORDER BY name", [], (err, rows) => {
+  db.all("SELECT id, name, url FROM menu_categories ORDER BY name", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
@@ -197,15 +201,66 @@ app.get("/categories", verifyToken, (req, res) => {
 
 
 // Menu list
+// app.get("/menu", verifyToken, (req, res) => {
+//   db.all(`
+//     SELECT mi.id, mi.name, mi.price, mi.category_id, mc.name AS category
+//     FROM menu_items mi
+//     LEFT JOIN menu_categories mc ON mi.category_id = mc.id
+//     ORDER BY mi.name
+//   `, [], (err, rows) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(rows);
+//   });
+// });
+
+// CREATE menu item
+app.post("/menu", verifyToken, requireAdmin, (req, res) => {
+  const { name, price, category_id, url } = req.body;
+  if (!name || !price) return res.status(400).json({ error: "Name and price required" });
+
+  db.run(
+    "INSERT INTO menu_items (name, price, category_id, url) VALUES (?, ?, ?, ?)",
+    [name, price, category_id || null, url || null],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID, name, price, category_id, url });
+    }
+  );
+});
+
+// READ all menu items
 app.get("/menu", verifyToken, (req, res) => {
   db.all(`
-    SELECT mi.id, mi.name, mi.price, mi.category_id, mc.name AS category
+    SELECT mi.id, mi.name, mi.price, mi.category_id, mi.url, mc.name AS category
     FROM menu_items mi
     LEFT JOIN menu_categories mc ON mi.category_id = mc.id
     ORDER BY mi.name
   `, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
+  });
+});
+
+// UPDATE menu item
+app.put("/menu/:id", verifyToken, requireAdmin, (req, res) => {
+  const { name, price, category_id, url } = req.body;
+  if (!name || !price) return res.status(400).json({ error: "Name and price required" });
+
+  db.run(
+    "UPDATE menu_items SET name=?, price=?, category_id=?, url=? WHERE id=?",
+    [name, price, category_id || null, url || null, req.params.id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) return res.status(404).json({ error: "Menu item not found" });
+      res.json({ updated: this.changes });
+    }
+  );
+});
+// DELETE menu item
+app.delete("/menu/:id", verifyToken, requireAdmin, (req, res) => {
+  db.run("DELETE FROM menu_items WHERE id=?", [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ deleted: this.changes });
   });
 });
 

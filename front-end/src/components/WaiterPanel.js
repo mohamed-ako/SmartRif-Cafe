@@ -75,8 +75,8 @@ export default function WaiterPanel() {
         
         
         <div key={cat.id} class="p-5 shadow-lg rounded-lg w-30 ml-5 flex flex-col justify-center justify-items-center bg-white" onClick={()=>setVariable(cat.id)}>
-          <img src="https://static.vecteezy.com/system/resources/thumbnails/023/742/327/small_2x/latte-coffee-isolated-illustration-ai-generative-free-png.png"></img>
-          <h3>{cat.name}</h3>
+                  <img src={cat.url}></img>
+                  <h3>{cat.name}</h3>
           
         </div>
         
@@ -105,7 +105,7 @@ export default function WaiterPanel() {
        <div className="product-grid" class=" flex flex-wrap justify-around">
        {menu.filter((item) => item.category_id === variable).map((item) => (
                   <div className="product-card " key={item.id} class=" mt-10 mr-10 w-50 flex flex-col items-center justify-center shadow-lg p-10 rounded-lg bg-white">
-                  <img src="https://static.vecteezy.com/system/resources/thumbnails/023/742/327/small_2x/latte-coffee-isolated-illustration-ai-generative-free-png.png"></img>
+                  <img src={item.url}></img>
                   <span>{item.name}</span>
                   <span>${item.price.toFixed(2)}</span>
                   <button onClick={() => addToCart(item)}>Add</button>
