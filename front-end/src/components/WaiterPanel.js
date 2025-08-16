@@ -6,8 +6,11 @@ export default function WaiterPanel() {
   const [menu, setMenu] = useState([]);
   const [tableId, setTableId] = useState("");
   const [cart, setCart] = useState([]);
+  const [variable, setVariable] = useState(1);
+
 
   // Fetch categories and products
+
   useEffect(() => {
     Promise.all([API.get("/categories"), API.get("/menu")]).then(
       ([catRes, menuRes]) => {
@@ -57,23 +60,40 @@ export default function WaiterPanel() {
     0
   );
 
+  //filter Cat 
+  
   return (
-    <div className="panel">
-      <h2>Waiter Panel</h2>
-      <input
-        placeholder="Table ID"
-        value={tableId}
-        onChange={(e) => setTableId(e.target.value)}
-      />
+    <>
+    
 
+    <div class="px-10 py-10 flex justify-between">
+
+    <div className="" style={{ width: "60%" }}>
+      <h2>Waiter Panel</h2>
+      <div class="p-5 flex flex-wrap ">
       {categories.map((cat) => (
+        
+        
+        <div key={cat.id} class="p-5 shadow-lg rounded-lg w-30 ml-5 flex flex-col justify-center justify-items-center bg-white" onClick={()=>setVariable(cat.id)}>
+          <img src="https://static.vecteezy.com/system/resources/thumbnails/023/742/327/small_2x/latte-coffee-isolated-illustration-ai-generative-free-png.png"></img>
+          <h3>{cat.name}</h3>
+          
+        </div>
+        
+      ))}
+    </div>
+      
+      
+
+      {/* {categories.map((cat) => (
         <div key={cat.id}>
           <h3>{cat.name}</h3>
-          <div className="product-grid">
+          <div className="product-grid" class=" flex flex-wrap justify-around">
             {menu
               .filter((item) => item.category_id === cat.id)
               .map((item) => (
-                <div className="product-card" key={item.id}>
+                <div className="product-card " key={item.id} class=" mt-10 mr-10 w-50 flex flex-col items-center justify-center shadow-lg p-10 rounded-lg bg-white">
+                  <img src="https://static.vecteezy.com/system/resources/thumbnails/023/742/327/small_2x/latte-coffee-isolated-illustration-ai-generative-free-png.png"></img>
                   <span>{item.name}</span>
                   <span>${item.price.toFixed(2)}</span>
                   <button onClick={() => addToCart(item)}>Add</button>
@@ -81,12 +101,31 @@ export default function WaiterPanel() {
               ))}
           </div>
         </div>
-      ))}
-
+      ))} */}
+       <div className="product-grid" class=" flex flex-wrap justify-around">
+       {menu.filter((item) => item.category_id === variable).map((item) => (
+                  <div className="product-card " key={item.id} class=" mt-10 mr-10 w-50 flex flex-col items-center justify-center shadow-lg p-10 rounded-lg bg-white">
+                  <img src="https://static.vecteezy.com/system/resources/thumbnails/023/742/327/small_2x/latte-coffee-isolated-illustration-ai-generative-free-png.png"></img>
+                  <span>{item.name}</span>
+                  <span>${item.price.toFixed(2)}</span>
+                  <button onClick={() => addToCart(item)}>Add</button>
+                </div>
+       ))}
+        </div>
+      
+    </div>
+    <div style={{ width: "30%" }} class="">
       <h3>Cart</h3>
       <ul>
+        <input
+        placeholder="Table ID"
+        value={tableId}
+        onChange={(e) => setTableId(e.target.value)}
+      />
         {cart.map((item) => (
-          <li className="cart-item" key={item.id}>
+         
+          <li className="cart-item " key={item.id} class="bg-white">
+             <img src="https://static.vecteezy.com/system/resources/thumbnails/023/742/327/small_2x/latte-coffee-isolated-illustration-ai-generative-free-png.png" class="w-15"></img>
             {item.name} (${item.price}) x
             <input
               type="number"
@@ -104,5 +143,7 @@ export default function WaiterPanel() {
       <h4>Total: ${totalPrice.toFixed(2)}</h4>
       <button onClick={sendOrder}>Send Order</button>
     </div>
+    </div>
+    </>
   );
 }

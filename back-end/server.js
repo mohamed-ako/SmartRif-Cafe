@@ -41,7 +41,8 @@ db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS menu_categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE
+      name TEXT NOT NULL UNIQUE,
+      url TEXT
     )
   `);
   db.run(`
@@ -50,21 +51,25 @@ db.serialize(() => {
       name TEXT NOT NULL,
       category_id INTEGER,
       price REAL NOT NULL,
+      url TEXT,
       FOREIGN KEY (category_id) REFERENCES menu_categories(id) ON DELETE SET NULL
     )
   `);
-  db.run(`
-    CREATE TABLE IF NOT EXISTS orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      table_id INTEGER,
-      waiter_id INTEGER,
-      status TEXT DEFAULT 'pending',
-      total REAL DEFAULT 0,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (table_id) REFERENCES tables(id) ON DELETE CASCADE,
-      FOREIGN KEY (waiter_id) REFERENCES users(id) ON DELETE SET NULL
-    )
-  `);
+  
+// db.js or wherever you initialize SQLite
+db.run(`
+  CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER,
+    itemId INTEGER,
+    quantity INTEGER,
+    totalPrice REAL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(userId) REFERENCES users(id),
+    FOREIGN KEY(itemId) REFERENCES items(id)
+  )
+`);
+
   db.run(`
     CREATE TABLE IF NOT EXISTS order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
