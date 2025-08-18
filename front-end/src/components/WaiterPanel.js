@@ -17,8 +17,11 @@ export default function WaiterPanel() {
         setCategories(catRes.data);
         setMenu(menuRes.data);
       }
-    );
+    ).catch(err => {
+      console.error("Fetch failed:", err.response?.data || err.message);
+    });
   }, []);
+  
 
   // Add item to cart
   const addToCart = (item) => {
@@ -83,25 +86,7 @@ export default function WaiterPanel() {
       ))}
     </div>
       
-      
-
-      {/* {categories.map((cat) => (
-        <div key={cat.id}>
-          <h3>{cat.name}</h3>
-          <div className="product-grid" class=" flex flex-wrap justify-around">
-            {menu
-              .filter((item) => item.category_id === cat.id)
-              .map((item) => (
-                <div className="product-card " key={item.id} class=" mt-10 mr-10 w-50 flex flex-col items-center justify-center shadow-lg p-10 rounded-lg bg-white">
-                  <img src="https://static.vecteezy.com/system/resources/thumbnails/023/742/327/small_2x/latte-coffee-isolated-illustration-ai-generative-free-png.png"></img>
-                  <span>{item.name}</span>
-                  <span>${item.price.toFixed(2)}</span>
-                  <button onClick={() => addToCart(item)}>Add</button>
-                </div>
-              ))}
-          </div>
-        </div>
-      ))} */}
+    
        <div className="product-grid" class=" flex flex-wrap justify-around">
        {menu.filter((item) => item.category_id === variable).map((item) => (
                   <div className="product-card " key={item.id} class=" mt-10 mr-10 w-50 flex flex-col items-center justify-center shadow-lg p-10 rounded-lg bg-white">

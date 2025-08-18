@@ -2,7 +2,7 @@ import { useState } from "react";
 import API from "../../api"; // make sure your API is imported
 
 export default function Categories({ data, fetchData }) {
-  const [showCategoryS, setShowCategoryS] = useState(false);
+  const [showCategoryS, setShowCategoryS] = useState(true);
   const [addCategoryS, setAddCategoryS] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [newCategory, setNewCategory] = useState("");
@@ -36,9 +36,9 @@ export default function Categories({ data, fetchData }) {
         {addCategoryS ? "Hide Add Category Form" : "Add Category"}
       </button>
 
-      <button onClick={() => setShowCategoryS(!showCategoryS)}>
+      {/* <button onClick={() => setShowCategoryS(!showCategoryS)}>
         {showCategoryS ? "Hide Categories List" : "Show Categories List"}
-      </button>
+      </button> */}
 
       {/* ADD OR EDIT CATEGORY FORM */}
       {(addCategoryS || editingCategory) && (

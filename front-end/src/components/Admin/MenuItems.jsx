@@ -2,7 +2,7 @@ import { useState } from "react";
 import API from "../../api";
 
 export default function MenuItems({ data, categories, fetchData }) {
-  const [showItemS, setShowItemS] = useState(false);
+  const [showItemS, setShowItemS] = useState(true);
   const [addItemS, setAddItemS] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(1);
@@ -47,9 +47,9 @@ export default function MenuItems({ data, categories, fetchData }) {
       <button onClick={() => setAddItemS(!addItemS)}>
         {addItemS ? "Hide Add Item Form" : "Add Item"}
       </button>
-      <button onClick={() => setShowItemS(!showItemS)}>
+      {/* <button onClick={() => setShowItemS(!showItemS)}>
         {showItemS ? "Hide Items List" : "Show Items List"}
-      </button>
+      </button> */}
 
       {/* Add/Edit Item Form */}
       {(addItemS || editingItem) && (

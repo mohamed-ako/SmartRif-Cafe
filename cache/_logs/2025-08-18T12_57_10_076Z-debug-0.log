@@ -8,8 +8,8 @@
 7 warn Unknown global config "globalignorefile". This will stop working in the next major version of npm.
 8 verbose title npm start
 9 verbose argv "start"
-10 verbose logfile logs-max:10 dir:E:\SmartRif-coffee\cache\_logs\2025-08-16T20_29_33_036Z-
-11 verbose logfile E:\SmartRif-coffee\cache\_logs\2025-08-16T20_29_33_036Z-debug-0.log
+10 verbose logfile logs-max:10 dir:E:\SmartRif-coffee\cache\_logs\2025-08-18T12_57_10_076Z-
+11 verbose logfile E:\SmartRif-coffee\cache\_logs\2025-08-18T12_57_10_076Z-debug-0.log
 12 silly logfile start cleaning logs, removing 1 files
 13 silly logfile done cleaning log files
 14 verbose cwd E:\SmartRif-coffee\back-end
@@ -18,4 +18,4 @@
 17 verbose npm  v11.5.1
 18 verbose exit 1
 19 verbose code 1
-20 error A complete log of this run can be found in: E:\SmartRif-coffee\cache\_logs\2025-08-16T20_29_33_036Z-debug-0.log
+20 error A complete log of this run can be found in: E:\SmartRif-coffee\cache\_logs\2025-08-18T12_57_10_076Z-debug-0.log

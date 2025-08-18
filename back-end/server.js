@@ -80,6 +80,21 @@ db.run(` CREATE TABLE IF NOT EXISTS orders (
 });
 
 // Middleware: Verify JWT
+// function verifyToken(req, res, next) {
+//   const authHeader = req.headers["authorization"];
+//   if (!authHeader) return res.status(403).json({ error: "No token provided" });
+
+//   const token = authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+//   if (!token) return res.status(403).json({ error: "Malformed token" });
+
+//   jwt.verify(token, SECRET_KEY, (err, decoded) => {
+//     if (err) return res.status(401).json({ error: "Invalid token" });
+//     req.userId = decoded.id;
+//     req.userRole = decoded.role;
+//     next();
+//   });
+// }
+
 function verifyToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   if (!authHeader) return res.status(403).json({ error: "No token provided" });
@@ -91,9 +106,11 @@ function verifyToken(req, res, next) {
     if (err) return res.status(401).json({ error: "Invalid token" });
     req.userId = decoded.id;
     req.userRole = decoded.role;
+    req.user = decoded; // attach user object if needed
     next();
   });
 }
+
 
 function requireAdmin(req, res, next) {
   if (req.userRole !== "admin") return res.status(403).json({ error: "Admin only" });
@@ -157,6 +174,57 @@ app.delete("/users/:id", verifyToken, requireAdmin, (req, res) => {
     res.json({ success: true, deleted: this.changes });
   });
 });
+
+// User orders summary (Admin only)
+app.get("/admin/user-orders", verifyToken, requireAdmin, (req, res) => {
+  const sql = `
+    SELECT 
+      u.id AS user_id,
+      u.name AS user_name,
+      o.id AS order_id,
+      DATE(o.created_at) AS date,
+      o.total AS order_total
+    FROM users u
+    LEFT JOIN orders o ON u.id = o.waiter_id
+    ORDER BY date DESC, u.name
+  `;
+
+  db.all(sql, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    // Group by user & date
+    const result = {};
+    rows.forEach(row => {
+      if (!result[row.user_id]) {
+        result[row.user_id] = {
+          user_id: row.user_id,
+          user_name: row.user_name,
+          dates: {}
+        };
+      }
+
+      if (row.date) {
+        if (!result[row.user_id].dates[row.date]) {
+          result[row.user_id].dates[row.date] = {
+            date: row.date,
+            orders: [],
+            total: 0
+          };
+        }
+
+        result[row.user_id].dates[row.date].orders.push({
+          order_id: row.order_id,
+          total: row.order_total
+        });
+
+        result[row.user_id].dates[row.date].total += row.order_total;
+      }
+    });
+
+    res.json(Object.values(result));
+  });
+});
+
 
 // Categories CRUD
 app.post("/categories", verifyToken, requireAdmin, (req, res) => {
@@ -264,46 +332,69 @@ app.delete("/menu/:id", verifyToken, requireAdmin, (req, res) => {
   });
 });
 
+
 // Orders
 app.post("/orders", verifyToken, (req, res) => {
   const { table_id, items } = req.body;
-  if (!Array.isArray(items) || items.length === 0)
-    return res.status(400).json({ error: "No items" });
 
-  db.get("SELECT id FROM tables WHERE id=?", [table_id], (err, table) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!table) return res.status(400).json({ error: "Invalid table_id" });
+  if (!table_id || !items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: "Invalid order format" });
+  }
 
-    db.run("INSERT INTO orders (table_id, waiter_id) VALUES (?, ?)",
-      [table_id, req.userId],
-      function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        const orderId = this.lastID;
+  const waiterId = req.userId; // from verifyToken middleware
+  if (!waiterId) {
+    return res.status(403).json({ error: "Unauthorized waiter" });
+  }
 
-        const insertItem = db.prepare("INSERT INTO order_items (order_id, item_id, quantity, note) VALUES (?, ?, ?, ?)");
-        for (const it of items) {
-          insertItem.run([orderId, it.item_id, it.quantity, it.note || null]);
-        }
-        insertItem.finalize((err) => {
-          if (err) return res.status(500).json({ error: err.message });
+  const createdAt = new Date().toISOString();
 
-          db.get(`
-            SELECT IFNULL(SUM(mi.price * oi.quantity), 0) AS total
-            FROM order_items oi
-            JOIN menu_items mi ON mi.id = oi.item_id
-            WHERE oi.order_id = ?
-          `, [orderId], (err, row) => {
-            if (err) return res.status(500).json({ error: err.message });
-            const total = row.total || 0;
-            db.run("UPDATE orders SET total=? WHERE id=?", [total, orderId], function (err) {
-              if (err) return res.status(500).json({ error: err.message });
-              res.json({ orderId, total });
-            });
+  // Insert order first
+  db.run(
+    `INSERT INTO orders (table_id, created_at, total, waiter_id) VALUES (?, ?, ?, ?)`,
+    [table_id, createdAt, 0, waiterId],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+
+      const orderId = this.lastID;
+      let total = 0;
+
+      // Use a promise-based approach to handle all item insertions
+      const itemPromises = items.map((it) => {
+        return new Promise((resolve, reject) => {
+          db.get(`SELECT price FROM menu_items WHERE id = ?`, [it.item_id], (err, row) => {
+            if (err) return reject(err);
+
+            const price = row?.price || 0;
+            total += price * it.quantity;
+
+            // Prepare and run the insert for each item
+            db.run(
+              `INSERT INTO order_items (order_id, item_id, quantity, note, price) VALUES (?, ?, ?, ?, ?)`,
+              [orderId, it.item_id, it.quantity, it.note || "", price],
+              function (err) {
+                if (err) return reject(err);
+                resolve();
+              }
+            );
           });
         });
-      }
-    );
-  });
+      });
+
+      Promise.all(itemPromises)
+        .then(() => {
+          // After all items are inserted and total is calculated, update the order
+          db.run(`UPDATE orders SET total = ? WHERE id = ?`, [total, orderId], (err) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true, order_id: orderId, total });
+          });
+        })
+        .catch((err) => {
+          // If any promise fails, return a 500 error
+          console.error("Error processing order items:", err.message);
+          res.status(500).json({ error: "Error processing order items: " + err.message });
+        });
+    }
+  );
 });
 
 // Admin Stats

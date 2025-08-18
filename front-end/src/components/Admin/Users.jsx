@@ -2,7 +2,7 @@ import { useState } from "react";
 import API from "../../api";
 
 export default function Users({ data, fetchData }) {
-  const [showUserS, setShowUserS] = useState(false);
+  const [showUserS, setShowUserS] = useState(true);
   const [addUserS, setAddUserS] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [newUser, setNewUser] = useState({ name: "", username: "", password: "", role: "waiter" });
@@ -46,9 +46,9 @@ export default function Users({ data, fetchData }) {
       <button onClick={() => setAddUserS(!addUserS)}>
         {addUserS ? "Hide Add User Form" : "Add User"}
       </button>
-      <button onClick={() => setShowUserS(!showUserS)}>
+      {/* <button onClick={() => setShowUserS(!showUserS)}>
         {showUserS ? "Hide Users List" : "Show Users List"}
-      </button>
+      </button> */}
 
       {(addUserS || editingUser) && (
         <div className="form-group">

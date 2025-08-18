@@ -26,24 +26,27 @@ ChartJS.register(
 );
 
 export default function AdminPanel() {
+  const [choosen, setChoosen] = useState(1);
   const [stats, setStats] = useState([]);
   const [totals, setTotals] = useState({});
   const [menu, setMenu] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
-
+  const [open, setOpen] = useState(false);
+  const [usersOrders, setUsersOrders] = useState()
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [t, m, u, c, s] = await Promise.all([
+      const [t, m, u, c, s, userOrders] = await Promise.all([
         API.get("/admin/stats"),
         API.get("/menu"),
         API.get("/users"),
         API.get("/categories"),
         API.get("/admin/profits"),
+        API.get("/admin/user-orders")
       ]);
 
       setTotals(t.data);
@@ -51,6 +54,7 @@ export default function AdminPanel() {
       setUsers(Array.isArray(u.data) ? u.data : []);
       setCategories(Array.isArray(c.data) ? c.data : []);
       setStats(Array.isArray(s.data) ? s.data : []);
+      setUsersOrders(Array.isArray(userOrders.data) ? userOrders.data : []);
     } catch (err) {
       console.error("Error fetching data:", err.response?.status, err.response?.data);
     }
@@ -78,35 +82,78 @@ export default function AdminPanel() {
     },
   };
 
-  // Optional: dummy addToCart
-  const addToCart = (item) => {
-    console.log("Add to cart:", item);
-  };
-
   return (
-    <div className="panel admin-panel">
-      <h2>Admin Dashboard</h2>
-
-      {/* STAT CARDS */}
-      <div className="dashboard-stats">
-        <div>Orders Today: {totals.ordersToday}</div>
-        <div>Sales Today: ${totals.salesToday}</div>
-        <div>Sales Week: ${totals.salesWeek}</div>
-        <div>Total Sales: ${totals.totalSales}</div>
-        <div>Total Users: {totals.userCount}</div>
+    <div className="admin-panel">
+          <div 
+        className={`burger-menu ${open ? "active" : ""}`} 
+        onClick={() => setOpen(!open)}
+      >
+        <div></div>
+        <div></div>
+        <div></div>
       </div>
 
-      {/* CHART */}
-      <div className="chart-container">
-        <Line data={chartData} options={chartOptions} />
-      </div>
+      {/* Sidebar / Nav */}
+      <ul className={`menu-drawer ${open ? "open" : ""}`}>
+        <li onClick={() => setChoosen(1)}>Dashboard</li>
+        <li onClick={() => setChoosen(2)}>User Manager</li>
+        <li onClick={() => setChoosen(3)}>User Orders</li>
+        <li onClick={() => setChoosen(4)}>Items Manager</li>
+        <li onClick={() => setChoosen(5)}>Categories Manager</li>
 
-      <hr />
+      </ul>
 
-      {/* PASS fetchData and categories as props */}
-      <Categoris data={categories} fetchData={fetchData} />
-      <MenuItems data={menu} categories={categories} fetchData={fetchData} addToCart={addToCart} />
-      <Users data={users} fetchData={fetchData} />
+      {/* Content */}
+      {choosen === 1 && (
+        <div className="panel ">
+          <h2>Admin Dashboard</h2>
+          <div className="dashboard-stats">
+            <div>Orders Today: {totals.ordersToday}</div>
+            <div>Sales Today: ${totals.salesToday}</div>
+            <div>Sales Week: ${totals.salesWeek}</div>
+            <div>Total Sales: ${totals.totalSales}</div>
+            <div>Total Users: {totals.userCount}</div>
+          </div>
+
+          <div className="chart-container">
+            <Line data={chartData} options={chartOptions} />
+          </div>
+        </div>
+      )}
+
+      {choosen === 2 && (
+        <Users data={users} fetchData={fetchData} />
+      )}
+
+      {choosen === 4 && (
+        <MenuItems data={menu} categories={categories} fetchData={fetchData} />
+      )}
+
+      {choosen === 5 && (
+        <Categoris data={categories} fetchData={fetchData} />
+      )}
+      
+        {choosen === 3 && (
+          <div className="panel">
+            <h2>User Orders by Date</h2>
+            {usersOrders.map(user => (
+              <div key={user.user_id} className="user-orders">
+                <h3>{user.user_name}</h3>
+                {Object.values(user.dates).map(d => (
+                  <div key={d.date} className="date-block">
+                    <strong>{d.date}</strong> - Total: ${d.total}
+                    <ul>
+                      {d.orders.map(o => (
+                        <li key={o.order_id}>Order #{o.order_id}: ${o.total}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+        
     </div>
   );
 }
