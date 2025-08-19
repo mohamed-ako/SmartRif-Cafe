@@ -31,10 +31,10 @@
     color: var(--text-color);
   }
   
-  h1, h2, h3 {
+  /* h1, h2, h3 {
     margin: 0 0 10px 0;
     color: var(--secondary-color);
-  }
+  } */
   
   button {
     cursor: pointer;
