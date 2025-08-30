@@ -3,6 +3,7 @@ import API from "../api";
 import Categoris from "./Admin/Categoris";
 import Users from "./Admin/Users";
 import MenuItems from "./Admin/MenuItems";
+import TablesManagement from "./Admin/TablesManagement";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -33,28 +34,33 @@ export default function AdminPanel() {
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
-  const [usersOrders, setUsersOrders] = useState()
+  const [usersOrders, setUsersOrders] = useState([])
+  const [tables, setTables] = useState([])
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [t, m, u, c, s, userOrders] = await Promise.all([
-        API.get("/admin/stats"),
-        API.get("/menu"),
-        API.get("/users"),
-        API.get("/categories"),
-        API.get("/admin/profits"),
-        API.get("/admin/user-orders")
-      ]);
+const [t, m, u, c, s, uOrders, tablesResponse] = await Promise.all([
+  API.get("/admin/stats"),
+  API.get("/menu"),
+  API.get("/users"),
+  API.get("/categories"),
+  API.get("/admin/profits"),
+  API.get("/admin/user-orders"),
+  API.get("/tables"),
+]);
+
 
       setTotals(t.data);
       setMenu(Array.isArray(m.data) ? m.data : []);
       setUsers(Array.isArray(u.data) ? u.data : []);
       setCategories(Array.isArray(c.data) ? c.data : []);
       setStats(Array.isArray(s.data) ? s.data : []);
-      setUsersOrders(Array.isArray(userOrders.data) ? userOrders.data : []);
+      setUsersOrders(Array.isArray(uOrders.data) ? uOrders.data : []);
+      setTables(tablesResponse.data);
     } catch (err) {
       console.error("Error fetching data:", err.response?.status, err.response?.data);
     }
@@ -82,6 +88,7 @@ export default function AdminPanel() {
     },
   };
 
+  console.log("user orders:",usersOrders)
   return (
     <div className="admin-panel">
           <div 
@@ -100,6 +107,8 @@ export default function AdminPanel() {
         <li onClick={() => setChoosen(3)}>User Orders</li>
         <li onClick={() => setChoosen(4)}>Items Manager</li>
         <li onClick={() => setChoosen(5)}>Categories Manager</li>
+        <li onClick={() => setChoosen(6)}>Tables Manager</li>
+
 
       </ul>
 
@@ -113,6 +122,8 @@ export default function AdminPanel() {
             <div>Sales Week: ${totals.salesWeek}</div>
             <div>Total Sales: ${totals.totalSales}</div>
             <div>Total Users: {totals.userCount}</div>
+            <div>Total Users: {totals.userCount}</div>
+
           </div>
 
           <div className="chart-container">
@@ -132,7 +143,9 @@ export default function AdminPanel() {
       {choosen === 5 && (
         <Categoris data={categories} fetchData={fetchData} />
       )}
-      
+      {choosen === 6 && (
+       <TablesManagement tables={tables} fetchData={fetchData} />
+      )}
         {choosen === 3 && (
           <div className="panel">
             <h2>User Orders by Date</h2>
