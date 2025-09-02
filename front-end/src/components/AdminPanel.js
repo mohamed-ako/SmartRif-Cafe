@@ -90,18 +90,19 @@ const [t, m, u, c, s, uOrders, tablesResponse] = await Promise.all([
 
   console.log("user orders:",usersOrders)
   return (
-    <div className="admin-panel">
-          <div 
+    <div className="admin-panel flex">
+          {/* <div 
         className={`burger-menu ${open ? "active" : ""}`} 
         onClick={() => setOpen(!open)}
       >
         <div></div>
         <div></div>
         <div></div>
-      </div>
+      </div> */}
 
       {/* Sidebar / Nav */}
-      <ul className={`menu-drawer ${open ? "open" : ""}`}>
+      <div class="w-1/10  flex justify-center ">
+      <ul class="w-max mt-5">
         <li onClick={() => setChoosen(1)}>Dashboard</li>
         <li onClick={() => setChoosen(2)}>User Manager</li>
         <li onClick={() => setChoosen(3)}>User Orders</li>
@@ -111,8 +112,9 @@ const [t, m, u, c, s, uOrders, tablesResponse] = await Promise.all([
 
 
       </ul>
-
+      </div>
       {/* Content */}
+      <div class=" w-9/10 ">
       {choosen === 1 && (
         <div className="panel ">
           <h2>Admin Dashboard</h2>
@@ -166,7 +168,7 @@ const [t, m, u, c, s, uOrders, tablesResponse] = await Promise.all([
             ))}
           </div>
         )}
-        
+      </div>  
     </div>
   );
 }
